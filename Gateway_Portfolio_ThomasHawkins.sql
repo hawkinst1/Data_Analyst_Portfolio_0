@@ -159,6 +159,23 @@ join Returns$ as return_table
 	on order_table.[Order ID] = return_table.[Order ID]
 where order_table.[Order ID] = return_table.[Order ID]
 
+create view maxMinTable as
+select [State or Province], CEILING(MAX(Profit)) as 'Highest Profit Item/ $', CAST(MIN(Profit) as int) as 'Lowest Profit Item/ $'
+from Orders$
+group by [State or Province]
+
+create view shippingCosts as
+select [Product Name], Region, [State or Province], [Ship Mode], [Shipping Cost], 
+	count(Region) OVER (partition by Region) as 'From Same Region'
+from Orders$
+
+create view regionSplit as
+select (
+	select (sum([Quantity ordered new])) from Orders$ where Region like '%st%' 
+) as 'East and West', (
+	select (sum([Quantity ordered new])) from Orders$ where Region = 'South' or Region = 'Central'
+)as 'South and Central'
+
 -- testing the view loads in
 select *
 from shippingData
